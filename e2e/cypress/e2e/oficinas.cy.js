@@ -25,8 +25,15 @@ describe('Oficinas TechLab', () => {
     cy.get('#consultar input[name="email"]').type(email);
     cy.get('#consultar button').click();
     cy.get('#reservas').should('contain', 'Docker na prática');
+    cy.intercept({
+      method: 'DELETE',
+      pathname: '/api/oficinas/1/inscricoes',
+    }).as('cancelSignup');
     cy.get('#reservas button').click();
 
+    cy.wait('@cancelSignup', { timeout: 15000 })
+      .its('response.statusCode')
+      .should('eq', 200);
     cy.get('#retorno-consulta').should('contain', 'Inscrição cancelada.');
     cy.get('#total-inscricoes').should('have.text', '0');
   });
